@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat message overlay</title>
+  <style type="text/css">
+    @import url('https://fonts.googleapis.com/css2?family=Anonymous+Pro&display=swap');
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      /* background-color: #00000000; */
+      background-color: #414450;
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      color: #FFFFFF;
+      background-color: #6441A440;
+      border-radius: 10px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+
+    .message.subscriber {
+      background-color: #6441A480;
+    }
+
+    .message.mod {
+      background-color: #6441A4C0;
+    }
+
+    .message.broadcaster {
+      background-color: #6441A4FF;
+      }
+
+    .message .content {
+      font-family: 'Anonymus-Pro', monospace;
+    }
+
+    .badge {
+      margin-bottom: .15rem;
+      margin-right: .3rem;
+      vertical-align: middle;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.0/socket.io.min.js" integrity="sha512-ZqQWGugamKhlSUqM1d/HMtwNG+hITmd/ptoof91lt5ojFZ+2bKlkvlzkmnDIrnikDY+UDVZVupLf6MNbuhtFSw==" crossorigin="anonymous"></script>
+  <script>
+    const socket = io('localhost:3000');
+    socket.on('message', (data) => {      
+      const insertedEl = createMessage(data);
+      document.querySelector('.container').prepend(createMessage(data));
+      insertedEl.focus();
+    });
+
+    function getBadges(data) {
+      if (data.badges) {
+        return data.badges.map((badge) => `<img class="badge" src="${badge.url}" alt="${badge.type}" />`);
+      }
+    }
+
+    function createMessage(data) {
+      const messageTemplate = `<h4 class="author">${getBadges(data)}${data.username}</h4><div class="content">${data.content}</div>`;
+      const messageEl = document.createElement('div');
+      messageEl.classList.add('message');
+      if (data.isSubscriber) {
+        messageEl.classList.add('subscriber');
+      }
+      if (data.isMod) {
+        messageEl.classList.add('mod');
+      }
+      if (data.isBroadcaster) {
+        messageEl.classList.add('broadcaster');
+      }
+      messageEl.innerHTML = messageTemplate;
+      return messageEl;
+    }
+  </script>
+</body>
+</html>
